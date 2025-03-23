@@ -4,23 +4,19 @@ import subprocess
 import threading
 import time
 
-# Set appearance mode and color theme
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-# Define modern colors
-THEME_COLOR = "#3B8ED0"  # Modern blue
-BUTTON_COLOR = "#1F6AA5"  # Darker blue
-BUTTON_HOVER_COLOR = "#144870"  # Even darker blue for hover
-FRAME_COLOR = "#2B2B2B"  # Dark background
-TEXT_COLOR = "#DCE4EE"  # Light text color
+THEME_COLOR = "#3B8ED0"
+BUTTON_COLOR = "#1F6AA5"
+BUTTON_HOVER_COLOR = "#144870"
+FRAME_COLOR = "#2B2B2B"
+TEXT_COLOR = "#DCE4EE"
 
-# Define fonts
 large_font = ("Segoe UI", 13)
 title_font = ("Segoe UI", 20, "bold")
 button_font = ("Segoe UI", 12)
 
-# Define helper functions first
 def create_browse_button(parent, command):
     return ctk.CTkButton(
         parent,
@@ -36,22 +32,21 @@ def create_browse_button(parent, command):
 
 def show_info():
     info_message = (
-        "Nuitka Converter v2.0\n\n"
+        "Nuitka GUI Converter v2.0\n"
+        "Created by IkuzaDev\n\n"
         "Quick Guide:\n"
-        "1. Select your Python script file\n"
-        "2. Choose output directory\n"
-        "3. Select desired build options\n"
-        "4. Click Convert to start building\n\n"
-        "Note: Standalone mode is recommended for most cases"
+        "1. Select Python file\n"
+        "2. Set output directory\n"
+        "3. Choose build options\n"
+        "4. Click Convert\n\n"
+        "Note: Standalone mode recommended"
     )
-    messagebox.showinfo("Information", info_message)
+    messagebox.showinfo("About", info_message)
 
-# Create the main window
 app = ctk.CTk()
-app.title("Nuitka Converter")
-app.geometry("750x800")  # More compact window size
+app.title("Nuitka GUI Converter - IkuzaDev")
+app.geometry("700x750")
 
-# Initialize variables after creating root window
 var_standalone = ctk.BooleanVar(value=True)
 var_onefile = ctk.BooleanVar()
 var_follow_imports = ctk.BooleanVar()
@@ -62,31 +57,33 @@ var_disable_console = ctk.BooleanVar()
 var_remove_output = ctk.BooleanVar()
 var_no_prefer_source = ctk.BooleanVar()
 
-# Configure grid weight
 app.grid_columnconfigure(0, weight=1)
 
-# Create main frame with modern styling
-main_frame = ctk.CTkFrame(
-    app,
-    fg_color=FRAME_COLOR,
-    corner_radius=15
-)
+main_frame = ctk.CTkFrame(app, fg_color=FRAME_COLOR, corner_radius=15)
 main_frame.pack(fill="both", expand=True, padx=15, pady=15)
 
-# Create header with modern design
 header_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
 header_frame.pack(fill="x", padx=10, pady=(5, 10))
 
-ctk.CTkLabel(
+title_label = ctk.CTkLabel(
     header_frame, 
-    text="Nuitka Converter",
+    text="Nuitka GUI Converter",
     font=title_font,
     text_color=THEME_COLOR
-).pack(side="left", pady=5)
+)
+title_label.pack(side="left", pady=5)
+
+credits_label = ctk.CTkLabel(
+    header_frame,
+    text="by IkuzaDev",
+    font=button_font,
+    text_color=TEXT_COLOR
+)
+credits_label.pack(side="left", pady=5, padx=10)
 
 help_btn = ctk.CTkButton(
     header_frame,
-    text="Guide",
+    text="About",
     command=show_info,
     font=button_font,
     width=90,
@@ -97,7 +94,6 @@ help_btn = ctk.CTkButton(
 )
 help_btn.pack(side="right", pady=5, padx=5)
 
-# Update scroll frame styling
 scroll_frame = ctk.CTkScrollableFrame(
     main_frame,
     fg_color="transparent",
@@ -105,18 +101,15 @@ scroll_frame = ctk.CTkScrollableFrame(
 )
 scroll_frame.pack(fill="both", expand=True, padx=10)
 
-# Create entry variables
 entry_file = ctk.CTkEntry(scroll_frame)
 entry_output_dir = ctk.CTkEntry(scroll_frame)
 entry_data_file = ctk.CTkEntry(scroll_frame)
 entry_icon_file = ctk.CTkEntry(scroll_frame)
 entry_plugin_name = ctk.CTkEntry(scroll_frame)
 
-# Replace entry fields with text areas for packages and modules
 entry_include_package = ctk.CTkTextbox(scroll_frame, height=60)
 entry_include_module = ctk.CTkTextbox(scroll_frame, height=60)
 
-# Create progress and status elements
 progress_bar = None
 percentage_label = None
 status_label = None
@@ -164,7 +157,6 @@ def convert():
         "--enable-plugin=tk-inter"
     ]
 
-    # Updated Nuitka options for latest version
     if var_standalone.get():
         options.append("--standalone")
     if var_onefile.get():
@@ -182,7 +174,6 @@ def convert():
     if var_no_prefer_source.get():
         options.append("--prefer-source-code")
     
-    # Package and module inclusions - Updated for multiple lines
     include_packages = entry_include_package.get("1.0", ctk.END).strip()
     if include_packages:
         for pkg in include_packages.splitlines():
@@ -197,7 +188,6 @@ def convert():
             if mod:
                 options.append(f"--include-module={mod}")
 
-    # Output Options
     if output_dir:
         options.append(f"--output-dir={output_dir}")
     if data_file:
@@ -212,7 +202,7 @@ def convert():
     def run_conversion():
         try:
             progress_bar.set(0)
-            progress_bar.configure(fg_color="blue")  # Reset color to blue
+            progress_bar.configure(fg_color="blue")
             status_label.configure(text="Converting...")
             threading.Thread(target=simulate_progress).start()
             subprocess.run(command, check=True)
@@ -221,20 +211,19 @@ def convert():
             messagebox.showinfo("Success", "Conversion completed successfully!")
         except subprocess.CalledProcessError as e:
             progress_bar.set(0)
-            progress_bar.configure(fg_color="red")  # Change color to red on failure
+            progress_bar.configure(fg_color="red")
             status_label.configure(text="Conversion failed.")
             messagebox.showerror("Error", f"Conversion failed: {e}")
 
     def simulate_progress():
         for i in range(101):
-            time.sleep(0.1)  # Simulate time delay for progress
+            time.sleep(0.1)
             progress_bar.set(i / 100)
             percentage_label.configure(text=f"{i}%")
             app.update_idletasks()
 
     threading.Thread(target=run_conversion).start()
 
-# File Selection Section
 file_section = ctk.CTkFrame(
     scroll_frame,
     fg_color=FRAME_COLOR,
@@ -242,14 +231,11 @@ file_section = ctk.CTkFrame(
 )
 file_section.pack(fill="x", pady=5)
 
-# Create a sub-frame for the actual content using grid
 content_frame = ctk.CTkFrame(file_section, fg_color="transparent")
 content_frame.pack(fill="x", padx=10, pady=5)
 
-# Title label using pack
 ctk.CTkLabel(file_section, text="File Selection", font=("Arial", 16, "bold")).pack(pady=5)
 
-# Add file selection widgets with consistent spacing
 ctk.CTkLabel(content_frame, text="Add Python Script:", font=large_font).grid(row=0, column=0, sticky="e", pady=5)
 entry_file = ctk.CTkEntry(content_frame, width=300, height=30, font=large_font)
 entry_file.grid(row=0, column=1, pady=5)
@@ -260,7 +246,6 @@ entry_output_dir = ctk.CTkEntry(content_frame, width=300, height=30, font=large_
 entry_output_dir.grid(row=1, column=1, pady=5)
 create_browse_button(content_frame, browse_output_dir).grid(row=1, column=2, pady=5, padx=5)
 
-# Fix the Browse button parent frame and layout
 ctk.CTkLabel(content_frame, text="Additional Files(optional):", font=large_font).grid(row=2, column=0, sticky="e", pady=5)
 entry_data_file = ctk.CTkEntry(content_frame, width=300, height=30, font=large_font)
 entry_data_file.grid(row=2, column=1, pady=5)
@@ -279,7 +264,6 @@ ctk.CTkLabel(content_frame, text="Python Version(optional):", font=large_font).g
 entry_python_version = ctk.CTkEntry(content_frame, width=300, height=30, font=large_font)
 entry_python_version.grid(row=5, column=1, pady=5)
 
-# Add package and module input sections with explanatory labels
 ctk.CTkLabel(content_frame, text="Include Packages (one per line):", font=large_font).grid(row=6, column=0, sticky="e", pady=5)
 entry_include_package = ctk.CTkTextbox(content_frame, width=300, height=60, font=large_font)
 entry_include_package.grid(row=6, column=1, pady=5)
@@ -290,16 +274,13 @@ entry_include_module = ctk.CTkTextbox(content_frame, width=300, height=60, font=
 entry_include_module.grid(row=7, column=1, pady=5)
 ctk.CTkLabel(content_frame, text="e.g. concurrent.futures\nurllib.parse", font=("Arial", 10)).grid(row=7, column=2, sticky="w", pady=5, padx=5)
 
-# Options Section
 options_section = ctk.CTkFrame(scroll_frame, fg_color=FRAME_COLOR)
 options_section.pack(fill="x", pady=10)
 ctk.CTkLabel(options_section, text="Build Options", font=("Arial", 16, "bold")).pack(pady=5)
 
-# Add options in a grid layout
 options_grid = ctk.CTkFrame(options_section, fg_color="transparent")
 options_grid.pack(fill="x", padx=10)
 
-# Create a more organized checkbox layout
 checkboxes = [
     ("Standalone", var_standalone, 0, 0),
     ("Onefile", var_onefile, 0, 1),
@@ -317,7 +298,6 @@ for text, var, row, col in checkboxes:
         row=row, column=col, padx=10, pady=5, sticky="w"
     )
 
-# Update progress section
 progress_frame = ctk.CTkFrame(
     app,
     fg_color=FRAME_COLOR,
